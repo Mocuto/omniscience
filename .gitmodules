@@ -1,0 +1,3 @@
+[submodule "mocugame"]
+	path = mocugame
+	url = https://mocuto.visualstudio.com/DefaultCollection/_git/MocuGame%20Library
