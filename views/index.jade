@@ -1,20 +1,12 @@
-doctype html
-html
-	head
-		title= title
-		link(rel='stylesheet', href='/stylesheets/style.css')
-		script(src="/socket.io/socket.io.js")
-		script.
-			var socket = new io();
+extends layout
 
-	body
-		h1= title
-		p Welcome to #{title}
+block content
+	h1= title
+	canvas#myCanvas
+	script.
+		MocuGame.targetResolutionWidth = 960
+		MocuGame.prepareCanvasForWindows81("myCanvas", new MocuGame.Point(960, 480), new MocuGame.Point(960, 480));
+		var state = new MocuGame.MocuState(60);
+		state.add(new ShrioGame.Player(new MocuGame.Point(0)))
 
-		input(
-			type='text'
-			value='text'
-		)
-		button(
-			text='send'
-		) send
+		MocuGame.init(state);
