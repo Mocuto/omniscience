@@ -1,0 +1,20 @@
+doctype html
+html
+	head
+		title= title
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		script(src="/socket.io/socket.io.js")
+		script.
+			var socket = new io();
+
+	body
+		h1= title
+		p Welcome to #{title}
+
+		input(
+			type='text'
+			value='text'
+		)
+		button(
+			text='send'
+		) send
