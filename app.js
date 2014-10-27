@@ -23,6 +23,16 @@ app.use(coffeeMiddleware({
     compress: true
 }));
 
+if (app.get('env') === 'development') {
+    app.use(function(err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
+    });
+}
+
 var clientsSocket = io.of('/clients');
 
 clientsSocket.on('connection', function(socket){
