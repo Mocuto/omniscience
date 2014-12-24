@@ -5,8 +5,8 @@ block content
 	canvas#myCanvas
 	script.
 		MocuGame.targetResolutionWidth = 960
-		MocuGame.prepareCanvasForWindows81("myCanvas", new MocuGame.Point(960, 480), new MocuGame.Point(960, 480));
+		MocuGame.prepareCanvas("myCanvas", new MocuGame.Point(960, 480), new MocuGame.Point(960, 480));
 		var state = new MocuGame.MocuState(60);
-		state.add(new ShrioGame.Player(new MocuGame.Point(0)))
+		
 
 		MocuGame.init(state);
