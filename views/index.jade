@@ -1,12 +1,13 @@
 extends layout
 
 block content
-	h1= title
-	canvas#myCanvas
+	h1="title"
+	p#OutputBin
 	script.
-		MocuGame.targetResolutionWidth = 960
-		MocuGame.prepareCanvas("myCanvas", new MocuGame.Point(960, 480), new MocuGame.Point(960, 480));
-		var state = new MocuGame.MocuState(60);
-		
-
-		MocuGame.init(state);
+		omni.init()
+		var conscience = omni.conscience("test");
+		conscience.onTokenGranted = function() {
+			conscience.sendThought({message : "HEY HEY HEY!!!"}, "test");
+			console.log("Thought sent");
+		}
+		console.log(conscience);

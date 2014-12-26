@@ -7,7 +7,7 @@ BC.onJoin = () ->
 BC.onDisconnect = () ->
 	alert("Disconnect!");
 
-clientsSocket = io("/clients");
+#clientsSocket = io("/clients");
 
-clientsSocket.on('connect', BC.onJoin)
+#clientsSocket.on('connect', BC.onJoin)
 
