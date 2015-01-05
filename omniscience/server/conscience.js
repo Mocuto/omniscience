@@ -2,26 +2,29 @@
 	omni.Conscience = function(io, name) {
 		this.io = io;
 		this.name = name;
+		
 		this.cleanName = this.name.replace(" ", "-"); //We will almost definitely need to fix this line
-		this.namespace = io.of(this.cleanName);
 
-		this.thoughtRoom = omni.THOUGHT;
-		this.stateRoom = omni.STATE;
+
+		this.thoughtNamespace = io.of(this.cleanName + "#" + omni.THOUGHT);
+		this.stateNamespace = io.of(this.cleanName + "#" + omni.STATE);
 
 		this.socketForId = {};
 		this.clients = [];
 
-		this.thoughtHandler = new omni.ThoughtHandler(this.namespace, this.socketForId);
+		this.state = {};
+
+		this.thoughtHandler = new omni.ThoughtHandler(this.thoughtNamespace, this.socketForId);
+		this.stateHandler = new omni.StateHandler(this.stateNamespace, this.socketForId, this.state);
 
 		var obj = this;
-		this.namespace.on("connection", function(socket) {
+		this.thoughtNamespace.on("connection", function(socket) {
 			var id = obj.generateId();
 			obj.socketForId[id] = socket;
 			socket.on(omni.REQUEST_TOKEN, function(data, callback) {
 				for(objId in obj.socketForId) {
 					var objSocket = obj.socketForId[objId]
 					if(objSocket === socket) {
-						//objSocket.emit(objId);
 						callback(objId)
 						return;
 					}
@@ -30,7 +33,6 @@
 				id = obj.generateId();
 				obj.socketForId[id] = socket;
 
-				//socket.emit(id);
 				callback(id)
 			})
 			obj.onClientConnected(id, socket);

@@ -3,9 +3,8 @@ omni.init = function() {
 }
 
 omni.conscience = function(name) {
-	var namespace = io("/" + name);
-
-	var conscience = new omni.Conscience(namespace, name, omni.token);
+	
+	var conscience = new omni.Conscience(name, omni.token);
 
 	return conscience;
 }

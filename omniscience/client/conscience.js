@@ -1,12 +1,17 @@
 (function() {
-	omni.Conscience = function(namespace, name, token) {
-		this.namespace = namespace;
+	omni.Conscience = function(name, token) {
+		var thoughtNamespace = io("/" + name + "#" + omni.THOUGHT);
+		this.thoughtNamespace = thoughtNamespace;
+
+		var stateNamespace = io("/" + name + "#" + omni.STATE);
+		this.stateNamespace = stateNamespace;
+
 		this.name = name;
 		this.token = null;
 		var obj = this;
-		this.thoughtHandler = new omni.ThoughtHandler(namespace);
+		this.thoughtHandler = new omni.ThoughtHandler(thoughtNamespace);
 
-		this.namespace.on("connect", function() {
+		this.thoughtNamespace.on("connect", function() {
 			obj.requestToken();
 			obj.onConnected();
 		})
@@ -14,7 +19,7 @@
 
 	omni.Conscience.prototype.requestToken = function() {
 		var obj = this;
-		this.namespace.emit(omni.REQUEST_TOKEN, "test", function(token) {
+		this.thoughtNamespace.emit(omni.REQUEST_TOKEN, "test", function(token) {
 			obj.token = token;
 			obj.onTokenGranted();
 		})
