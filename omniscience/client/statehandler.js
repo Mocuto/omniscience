@@ -13,16 +13,24 @@
 				for(var i = 0; i < data.__omniChildPropertyNames.length; i++)
 				{
 					var childName = data.__omniChildPropertyNames[i];
-					var obj = this;
 					var property = data[childName];
+
+					var queryName = property.fullName.substr((omni.STATE + ".").length)
+					console.log(queryName);
+					var getFunction = (function(propertyName) {
+						console.log("this")
+						console.log(propertyName);
+						return this.get(this.token, propertyName);
+					}).bind(this, queryName);
+
+					var setFunction = (function(propertyName, newValue) {
+						this.set(this.token, propertyName, newValue)
+					}).bind(this, queryName);
+
 					Object.defineProperty(data, childName, {
 						enumerable : true,
-						get : function() {
-							return obj.get(obj.token, property.fullName);
-						},
-						set : function(newValue) {
-							obj.set(obj.token, property.fullName, newValue);
-						}
+						get : getFunction,
+						set : setFunction
 					})
 				}
 			}
@@ -42,32 +50,23 @@
 		var obj = this;
 		this.socket.emit(omni.SET_STATE, token, name, value, function(data) {
 			var convertedData = convertChildProperties.call(obj, data);
-			callback(data);
+			if(typeof callback !== "undefined") {
+				callback(data);
+			}
 		});
 	}
 
 	omni.StateHandler.prototype.get = function(token, name) {
-		var container = {result :
-		var result = null;
-		var retrieved = false;
-		var timedOut = false;
 
-		console.log(omni.GET_TIMEOUT);
-		var timeoutIndex = setTimeout(function() {
-			timedOut = true;
-		}, omni.GET_TIMEOUT)
-
-		this.socket.emit(omni.GET_STATE, token, name, function(data) {
-			result = convertChildProperties(data);
-			retrieved = true;
+		var obj = this;
+		var promise = new Promise(function(resolve, reject) {
+			obj.socket.emit(omni.GET_STATE, token, name, function(data) {
+				result = convertChildProperties.call(obj,data);
+				resolve(result);
+			})
 		})
 
-		if (timedOut == true)
-		{
-			throw "omni.StateHandler.prototype.get timed out for name: " + name;
-		}
-
-		return result;
+		return promise;
 	}
 
 	omni.StateHandler.prototype.hook = function(token, serverName, clientObject, clientName) {

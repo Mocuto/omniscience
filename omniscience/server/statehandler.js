@@ -81,6 +81,9 @@
 	}
 
 	omni.StateHandler.prototype.getProperty = function(propertyName) {
+		if(typeof propertyName !== "string") {
+			return null;
+		}
 		if(propertyName.length == 0) {
 			return this.state;
 		}

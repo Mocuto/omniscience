@@ -29,7 +29,7 @@
 			obj.token = token;
 			obj.getState("", function(state) {
 				obj.state = state;
-				obj.state.token = token;
+				obj.stateHandler.token = token;
 			})
 			obj.onTokenGranted();
 		})
@@ -57,10 +57,6 @@
 
 	omni.Conscience.prototype.getState = function(name, callback) {
 		this.stateHandler.map(this.token, name, callback);
-	}
-
-	omni.Conscience.prototype.getStateSynchronously = function(name, callback) {
-		return this.stateHandler.get(this.token, name);
 	}
 
 	omni.Conscience.prototype.setState = function(name, value, callback) {
