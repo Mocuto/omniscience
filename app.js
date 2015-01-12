@@ -46,6 +46,37 @@ conscience.onThought("test", function(thought) {
     console.log(thought);
 })
 
+var emotions = ["happy", "sad", "angry"]
+
+conscience.addProperty(conscience.state, "emotionIndex", {
+    get : function() {
+        return this.value;
+    },
+    set : function(newValue) {
+        this.value = newValue % emotions.length;
+    },
+    value : 0
+})
+
+conscience.addProperty(conscience.state, "emotion", {
+    get : function() {
+        console.log("Client is getting the emotion...!");
+        return emotions[(conscience.state.emotionIndex = (conscience.state.emotionIndex + 1) % emotions.length)];
+    }
+})
+
+conscience.addProperty(conscience.state, "name", {
+    get : function(token) {
+        return this.value;
+    },
+    set : function(token, newValue) {
+        this.value = newValue;
+    },
+    name : "Mocuto"
+})
+
+console.log(conscience.state);
+
 
 /*var clientsSocket = io.of('/clients');
 
@@ -63,8 +94,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
-console.log("Test");
 
 /// error handlers
 

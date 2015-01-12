@@ -3,22 +3,23 @@
 		this.io = io;
 		this.name = name;
 		
-		this.cleanName = this.name.replace(" ", "-"); //We will almost definitely need to fix this line
+		this.cleanName = omni.getCleanNameForNamespace(name);
 
 
-		this.thoughtNamespace = io.of(this.cleanName + "#" + omni.THOUGHT);
-		this.stateNamespace = io.of(this.cleanName + "#" + omni.STATE);
+		this.thoughtNamespace = io.of(omni.getNameForNamespace(this.cleanName, omni.THOUGHT));
+		this.stateNamespace = io.of(omni.getNameForNamespace(this.cleanName, omni.STATE));
 
 		this.socketForId = {};
 		this.clients = [];
 
-		this.state = {};
+		this.state = new omni.Property("state", function() { return this.value; }, function() {}, {});
 
 		this.thoughtHandler = new omni.ThoughtHandler(this.thoughtNamespace, this.socketForId);
 		this.stateHandler = new omni.StateHandler(this.stateNamespace, this.socketForId, this.state);
 
 		var obj = this;
 		this.thoughtNamespace.on("connection", function(socket) {
+			console.log("a connection")
 			var id = obj.generateId();
 			obj.socketForId[id] = socket;
 			socket.on(omni.REQUEST_TOKEN, function(data, callback) {
@@ -82,4 +83,13 @@
 			}
 		}
 	}
+
+	omni.Conscience.prototype.addProperty = function(object, name, options) {
+		this.stateHandler.addProperty(object, name, options);
+	}
+
+	omni.Conscience.prototype.removeProperty = function(object, name) {
+		this.stateHandler.removeProperty(object, name);
+	}
+	
 })();

@@ -1,13 +1,17 @@
 (function() {
 	omni.Conscience = function(name, token) {
-		var thoughtNamespace = io("/" + name + "#" + omni.THOUGHT);
-		this.thoughtNamespace = thoughtNamespace;
-
-		var stateNamespace = io("/" + name + "#" + omni.STATE);
-		this.stateNamespace = stateNamespace;
-
 		this.name = name;
 		this.token = null;
+
+		this.cleanName = omni.getCleanNameForNamespace(name);
+
+		var thoughtNamespace = io(omni.getNameForNamespace(this.cleanName, omni.THOUGHT));
+		this.thoughtNamespace = thoughtNamespace;
+
+		var stateNamespace = io(omni.getNameForNamespace(this.cleanName, omni.STATE));
+		this.stateNamespace = stateNamespace;
+
+
 		var obj = this;
 		this.thoughtHandler = new omni.ThoughtHandler(thoughtNamespace);
 
@@ -15,12 +19,18 @@
 			obj.requestToken();
 			obj.onConnected();
 		})
+
+		this.stateHandler = new omni.StateHandler(stateNamespace);
 	}
 
 	omni.Conscience.prototype.requestToken = function() {
 		var obj = this;
 		this.thoughtNamespace.emit(omni.REQUEST_TOKEN, "test", function(token) {
 			obj.token = token;
+			obj.getState("", function(state) {
+				obj.state = state;
+				obj.state.token = token;
+			})
 			obj.onTokenGranted();
 		})
 	}
@@ -43,5 +53,17 @@
 		}
 		var thought = new omni.Thought(data, name, this.token, receivers);
 		this.thoughtHandler.send(thought, callback)
+	}
+
+	omni.Conscience.prototype.getState = function(name, callback) {
+		this.stateHandler.map(this.token, name, callback);
+	}
+
+	omni.Conscience.prototype.getStateSynchronously = function(name, callback) {
+		return this.stateHandler.get(this.token, name);
+	}
+
+	omni.Conscience.prototype.setState = function(name, value, callback) {
+		this.stateHandler.set(this.token, name, value, callback);
 	}
 })();

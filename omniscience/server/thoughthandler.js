@@ -30,18 +30,20 @@
 	omni.ThoughtHandler.prototype.applyFunctionToSocket = function(name, callback, callee, socket) {
 		var obj = this;
 		socket.on(name, function(thought, acknowledgementFunction) { 
-			if(typeof thought.sender !== "undefined" && thought.sender != null) {
-				//TODO: Add additional validation functionality here
+			if (typeof thought.sender !== "undefined" && thought.sender != null)
+			{
 	
 				callback.call(callee, thought) //We're assuming for now that socket.io correctly serializes and deserializes objects.	
 
-				//TODO: Handle broadcasting here
 				var receivers = thought.receivers;
-				if(typeof receivers === "undefined" || receivers == null) {
+				if(typeof receivers === "undefined" || receivers == null)
+				{
 					obj.broadcast(thought, thought.sender);
 				}
-				else if(Array.prototype.isPrototypeOf(receivers)) {
-					for(var i = 0; i < receivers.length; i++) {
+				else if(Array.prototype.isPrototypeOf(receivers))
+				{
+					for(var i = 0; i < receivers.length; i++)
+					{
 						var id = receivers[i];
 						obj.send(thought, id);
 					}
@@ -59,13 +61,13 @@
 
 			this.applyFunctionToSocket(name, callback, callee, socket);
 		}
-
 	}
 
 	omni.ThoughtHandler.prototype.on = function(name, callback, callee, validationFunction) {
 		var func = function(thought) {
 			validationFunction = (validationFunction || function() { return true });
-			if( validationFunction() === true) {
+			if( validationFunction() === true)
+			{
 				return callback.call(this, thought);
 			}
 		}

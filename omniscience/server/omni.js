@@ -2,8 +2,11 @@ require("../dependencies/Math.uuid.js")
 require("../shared/omni.js")
 require("../shared/thought.js")
 
+require("./property.js")
+require("./statehandler.js")
 require("./thoughthandler.js")
 require("./conscience.js")
+
 
 omni.init = function(io) {
 	omni.io = io;

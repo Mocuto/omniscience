@@ -11,3 +11,8 @@ block content
 			console.log("Thought sent");
 		}
 		console.log(conscience);
+		conscience.onTokenGranted = function() {
+			conscience.getState("emotion", function(emotion) {
+				console.log(emotion)
+			});
+		}
