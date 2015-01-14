@@ -8,6 +8,8 @@ omni.TOKEN_GRANTED = "token-granted";
 
 omni.GET_STATE = "get-state"
 omni.SET_STATE = "set-state";
+omni.HOOK_STATE = "hook-state";
+omni.UNHOOK_STATE = "unhook-state";
 
 omni.GET_TIMEOUT = 3000;
 

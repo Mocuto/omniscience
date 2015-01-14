@@ -1,7 +1,9 @@
 (function() {
-	omni.Property = function(name, getFunction, setFunction, initialValue) {
+	omni.Property = function(name, getFunction, setFunction, initialValue, stateHandler) {
 		this.name = name;
 		this.fullName = name;
+		this.stateHandler = stateHandler;
+
 		this.childrenNames = [];
 
 		var _value = initialValue;
@@ -9,6 +11,10 @@
 		this.set = setFunction;
 
 		this.isHooked = false;
+		this.hookedSockets = [];
+
+		var obj = this;
+
 		Object.defineProperty(this, "value", 
 		{
 			configurable : true,
@@ -19,6 +25,10 @@
 			},
 			set : function(newValue) {
 				_value = newValue;
+
+				if(obj.isHooked == true) {
+					obj.stateHandler.updateHook(obj.fullName, newValue);
+				}
 			}
 		})
 
@@ -32,6 +42,10 @@
 				throw "Setter is undefined for property: " + name + "! By default clients cannot set the value"
 			}
 		}
+	}
+
+	omni.Property.prototype.addHook = function(socket) {
+		this.hookedSockets.push(socket);
 	}
 
 })();

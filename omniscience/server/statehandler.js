@@ -3,6 +3,7 @@
 		this.io = namespaceSocket;
 		this.sockets = sockets;
 		this.state = state;
+		this.hookedSocketsForProperty = {};
 
 		var obj = this;
 		this.io.on("connect", function(socket) {
@@ -78,6 +79,32 @@
 				callback(false);
 			}
 		})
+
+		socket.on(omni.HOOK_STATE, function(token, propertyName, callback) {
+			var property = obj.getProperty(propertyName);
+			if(property != null) {
+				obj.hookedSocketsForProperty[propertyName].push(socket);
+				property.isHooked = true;
+				callback();
+			}
+		})
+
+		socket.on(omni.UNHOOK_STATE, function(token, propertyName, callback)) {
+			var property = obj.getProperty(propertyName);
+			if(property != null) {
+				var index = obj.hookedSocketsForProperty[propertyName].indexOf(socket);
+
+				if(index != -1) {
+					obj.hookedSocketsForProperty[propertyName].splice(index, 1);
+
+					if(obj.hookedSocketsForProperty[propertyName].length == 0) {
+						property.isHooked = false;						
+					}
+				}
+
+				callback();
+			}
+		}
 	}
 
 	omni.StateHandler.prototype.getProperty = function(propertyName) {
@@ -107,7 +134,7 @@
 
 	omni.StateHandler.prototype.addProperty = function(object, name, options) {
 
-		var newProp = new omni.Property(name, options.get, options.set, options.value);
+		var newProp = new omni.Property(name, options.get, options.set, options.value, this);
 		newProp.fullName = object.fullName + "." + name;
 
 		object.value[name] = newProp;
@@ -128,9 +155,12 @@
 			}
 		);
 
+		this.hookedSocketsForProperty[newProp.fullName] = [];
+
 		if(object.isHooked == true)
 		{
-			//TODO: Handle hooking here, if the parentProperty is hooked		
+			newProp.isHooked = true;
+			this.hookedSocketsForProperty[newProp.fullName] = this.hookedSocketsForProperty[object.fullName];
 		}
 
 		this.properties[newProp.fullName] = newProp;
@@ -145,6 +175,12 @@
 		}
 
 		delete this.properties[prop.fullName];
+
+		if(object.isHooked == true)
+		{
+			delete this.hookedSocketsForProperty[prop.fullName];
+		}
+
 		//Define getter and setter on object
 		Object.defineProperty(object, name,
 			{
@@ -157,13 +193,24 @@
 		);
 
 		var index = object.childrenNames.indexOf(name);
-		if(index != -1) {
+		if(index != -1)
+		{
 			object.childrenNames.splice(index, 1);
 		}
+	}
 
-		if(object.isHooked == true)
+	omni.StateHandler.prototype.updateHook = function(propertyName, value) {
+		var sockets = this.hookedSocketsForProperty[propertyName];
+
+		if(typeof sockets !== "undefined")
 		{
-			//TODO: Handle hooking here, if the parentProperty is hooked		
+
+			for(var i = 0; i < sockets.length; i++)
+			{
+				var socket = sockets[i];
+				socket.emit(omni.HOOK_STATE, propertyName, value)
+			}
+
 		}
 	}
 })();
