@@ -28,7 +28,9 @@
 		this.thoughtNamespace.emit(omni.REQUEST_TOKEN, "test", function(token) {
 			obj.token = token;
 			obj.getState("", function(state) {
+				console.log("TEST");
 				obj.state = state;
+				console.log(token);
 				obj.stateHandler.token = token;
 			})
 			obj.onTokenGranted();
@@ -61,5 +63,9 @@
 
 	omni.Conscience.prototype.setState = function(name, value, callback) {
 		this.stateHandler.set(this.token, name, value, callback);
+	}
+
+	omni.Conscience.prototype.hook = function(serverName, clientObject, clientName) {
+		this.stateHandler.hook(this.token, serverName, clientObject, clientName);
 	}
 })();

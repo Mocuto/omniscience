@@ -9,30 +9,38 @@
 
 			var tokens = propertyName.split(".");
 			var name = "";
+
+
 			
 			var clientObject = null;
 			var clientName = "";
 
-			for(var i = 0; i < tokens.length; i++) {
-				name += tokens[i];
 
-				if(name in obj.clientPairsForHookedName) {
-					var pair = obj.clientPairsForHookedName[name];
+			name = propertyName
+			var pair = obj.clientPairsForHookedName[name];
 
-					clientObject = pair.object;
-					clientName = pair.name;
-				}
-				else {
-					clientObject = clientObject[clientName];
-					clientName = token[i];
-				}
+			clientObject = pair.object;
+			clientName = pair.name;
 
-				name += ".";
-			}
+			clientObject[clientName] = value;
 
-			if(clientObject != null) {
-				clientObject[clientName] = value;				
-			}
+
+			// for(var i = 0; i < tokens.length; i++) {
+			// 	name += tokens[i];
+
+			// 	if(name in obj.clientPairsForHookedName) {
+			// 	}
+			// 	else {
+			// 		clientObject = clientObject[clientName];
+			// 		clientName = token[i];
+			// 	}
+
+			// 	name += ".";
+			// }
+
+			// if(clientObject != null) {
+			// 	clientObject[clientName] = value;				
+			// }
 		})
 	}
 
@@ -73,6 +81,8 @@
 	omni.StateHandler.prototype.map = function(token, name, callback) {
 		var obj = this;
 		this.socket.emit(omni.GET_STATE, token, name, function(data) {
+			console.log("data is");
+			console.log(data);
 			var convertedData = convertChildProperties.call(obj, data)
 			callback(data);
 		});

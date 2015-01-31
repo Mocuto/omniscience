@@ -7,12 +7,14 @@ block content
 		omni.init()
 		var conscience = omni.conscience("test");
 		conscience.onTokenGranted = function() {
-			conscience.sendThought({message : "HEY HEY HEY!!!"}, "test");
-			console.log("Thought sent");
+			//conscience.sendThought({message : "HEY HEY HEY!!!"}, "test");
+			//console.log("Thought sent");
 		}
-		console.log(conscience);
+		//console.log(conscience);
+		var fruit = {apples : 0};
+		
 		conscience.onTokenGranted = function() {
-			conscience.getState("emotion", function(emotion) {
-				console.log(emotion)
-			});
+			conscience.hook("apples", fruit, "apples");
+
+			//conscience.setState("apples.oranges", 2);
 		}

@@ -6,7 +6,7 @@
 		this.hookedSocketsForProperty = {};
 
 		var obj = this;
-		this.io.on("connect", function(socket) {
+		this.io.on("connection", function(socket) {
 			obj.prepareSocket(socket);
 		})
 
@@ -30,6 +30,24 @@
 		}
 	}
 
+	var convertHookedProperty = function(property) {
+		var value = omni.clone(property.value);  //TODO: CLone this value instead
+
+
+		if(Object.prototype.isPrototypeOf(value))
+		{
+			for(var i = 0; i < property.childrenNames.length; i++)
+			{
+				var childName = property.childrenNames[i];
+
+				value[childName] = convertHookedProperty(property.value[childName]);
+			}
+		}
+
+		return value;
+		
+	}
+
 	omni.StateHandler.prototype.prepareSocket = function(socket) {
 		var obj = this;
 
@@ -39,6 +57,7 @@
 			if(typeof callback === "undefined" || callback == null) {
 				callback = function() {};
 			}
+			//callback = function() {console.log("I ran!")};
 
 			if(property != null && token != null)
 			{
@@ -48,6 +67,8 @@
 				{
 					convertPropertyForClient(property, value);
 				}
+				//value.stateHandler = null;
+				console.log(value);
 				callback(value);
 			}
 			else
@@ -82,14 +103,17 @@
 
 		socket.on(omni.HOOK_STATE, function(token, propertyName, callback) {
 			var property = obj.getProperty(propertyName);
-			if(property != null) {
+			if(property != null && propertyName in obj.hookedSocketsForProperty) {
+				console.log("Hooking: " + propertyName)
 				obj.hookedSocketsForProperty[propertyName].push(socket);
 				property.isHooked = true;
 				callback();
+				console.log(convertHookedProperty(property));
+				socket.emit(omni.HOOK_STATE, propertyName, convertHookedProperty(property))
 			}
 		})
 
-		socket.on(omni.UNHOOK_STATE, function(token, propertyName, callback)) {
+		socket.on(omni.UNHOOK_STATE, function(token, propertyName, callback) {
 			var property = obj.getProperty(propertyName);
 			if(property != null) {
 				var index = obj.hookedSocketsForProperty[propertyName].indexOf(socket);
@@ -104,7 +128,7 @@
 
 				callback();
 			}
-		}
+		});
 	}
 
 	omni.StateHandler.prototype.getProperty = function(propertyName) {
@@ -155,15 +179,17 @@
 			}
 		);
 
-		this.hookedSocketsForProperty[newProp.fullName] = [];
+		var subName = newProp.fullName.substr("state.".length);
+		console.log("SubName is " + subName);
+		this.hookedSocketsForProperty[subName] = [];
 
 		if(object.isHooked == true)
 		{
 			newProp.isHooked = true;
-			this.hookedSocketsForProperty[newProp.fullName] = this.hookedSocketsForProperty[object.fullName];
+			this.hookedSocketsForProperty[subName] = this.hookedSocketsForProperty[object.fullName.substr("state.")];
 		}
 
-		this.properties[newProp.fullName] = newProp;
+		this.properties[subName] = newProp;
 	}
 
 	omni.StateHandler.prototype.removeProperty = function(object, name) {
@@ -174,11 +200,13 @@
 			return;
 		}
 
+		var subName = prop.fullName.substr("state.".length);
+
 		delete this.properties[prop.fullName];
 
 		if(object.isHooked == true)
 		{
-			delete this.hookedSocketsForProperty[prop.fullName];
+			delete this.hookedSocketsForProperty[subName];
 		}
 
 		//Define getter and setter on object
@@ -200,15 +228,18 @@
 	}
 
 	omni.StateHandler.prototype.updateHook = function(propertyName, value) {
-		var sockets = this.hookedSocketsForProperty[propertyName];
+		var subName = propertyName.substr("state.".length);
+		var sockets = this.hookedSocketsForProperty[subName];
 
+		console.log("Update hook");
+		console.log(sockets);
 		if(typeof sockets !== "undefined")
 		{
 
 			for(var i = 0; i < sockets.length; i++)
 			{
 				var socket = sockets[i];
-				socket.emit(omni.HOOK_STATE, propertyName, value)
+				socket.emit(omni.HOOK_STATE, subName, convertHookedProperty(value))
 			}
 
 		}

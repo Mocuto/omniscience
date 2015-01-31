@@ -2,7 +2,16 @@
 	omni.Property = function(name, getFunction, setFunction, initialValue, stateHandler) {
 		this.name = name;
 		this.fullName = name;
-		this.stateHandler = stateHandler;
+
+		Object.defineProperty(this, "stateHandler", {
+			configurable : true,
+			enumerable : false,
+			get : function() {
+				return stateHandler
+			}
+		});
+
+		//this.stateHandler = stateHandler;
 
 		this.childrenNames = [];
 
@@ -27,6 +36,7 @@
 				_value = newValue;
 
 				if(obj.isHooked == true) {
+
 					obj.stateHandler.updateHook(obj.fullName, newValue);
 				}
 			}

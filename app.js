@@ -65,15 +65,39 @@ conscience.addProperty(conscience.state, "emotion", {
     }
 })
 
-conscience.addProperty(conscience.state, "name", {
+conscience.addProperty(conscience.state, "myName", {
     get : function(token) {
         return this.value;
     },
     set : function(token, newValue) {
         this.value = newValue;
     },
-    name : "Mocuto"
+    value : "Mocuto"
 })
+
+conscience.addProperty(conscience.state, "apples", {
+    get: function(token) {
+        return this.value;
+    },
+    set : function(token, newValue) {
+        this.value = newValue;
+    },
+    value : {}
+})
+
+console.log(conscience.state.value.apples)
+
+conscience.addProperty(conscience.state.value.apples, "oranges", {
+    get : function(token) {
+        return this.value;
+    },
+    set : function(token, newValue) {
+        this.value = newValue
+    },
+    value : 0
+})
+
+console.log(conscience.state.apples.oranges);
 
 console.log(conscience.state);
 

@@ -20,3 +20,23 @@ omni.getCleanNameForNamespace = function(name) {
 omni.getNameForNamespace = function(name, type) {
 	return "/" + this.cleanName + "__" + omni.THOUGHT
 }
+
+omni.clone = function (object) {
+        if (object == null || typeof object != 'object') {
+            return object;
+        }
+        try 
+        {
+        	var temp = new object.constructor(); // give temp the original obj's constructor
+        	for (var key in object)
+        	{
+                temp[key] = omni.clone(object[key]);
+            }
+        }
+        catch (err)
+        {
+            console.log("Error caught: " + err.message);
+            console.log("Key is: " + key);
+        }
+        return temp;
+    };
