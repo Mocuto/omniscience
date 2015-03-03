@@ -1,4 +1,6 @@
 (function() {
+
+
 	omni.Property = function(name, getFunction, setFunction, initialValue, stateHandler) {
 		this.name = name;
 		this.fullName = name;
@@ -35,9 +37,10 @@
 			set : function(newValue) {
 				_value = newValue;
 
-				if(obj.isHooked == true) {
+				if(obj.isHooked == true)
+				{
 
-					obj.stateHandler.updateHook(obj.fullName, newValue);
+					obj.stateHandler.updateHook(obj.fullName, obj);
 				}
 			}
 		})

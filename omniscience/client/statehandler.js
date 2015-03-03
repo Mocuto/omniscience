@@ -5,43 +5,27 @@
 		this.clientPairsForHookedName = {};
 
 		var obj = this;
-		this.socket.on(omni.HOOK_STATE, function(propertyName, value) {
+	};
+
+	omni.StateHandler.prototype.onConnected = function() {
+		this.socket.on(omni.HOOK_STATE, (function(propertyName, value) {
 
 			var tokens = propertyName.split(".");
 			var name = "";
-
-
 			
 			var clientObject = null;
 			var clientName = "";
 
 
 			name = propertyName
-			var pair = obj.clientPairsForHookedName[name];
+			var pair = this.clientPairsForHookedName[name];
 
 			clientObject = pair.object;
 			clientName = pair.name;
 
 			clientObject[clientName] = value;
 
-
-			// for(var i = 0; i < tokens.length; i++) {
-			// 	name += tokens[i];
-
-			// 	if(name in obj.clientPairsForHookedName) {
-			// 	}
-			// 	else {
-			// 		clientObject = clientObject[clientName];
-			// 		clientName = token[i];
-			// 	}
-
-			// 	name += ".";
-			// }
-
-			// if(clientObject != null) {
-			// 	clientObject[clientName] = value;				
-			// }
-		})
+		}).bind(this));
 	}
 
 	var convertChildProperties = function(data) {
@@ -114,11 +98,13 @@
 	omni.StateHandler.prototype.hook = function(token, serverName, clientObject, clientName) {
 		// TODO: Handle hooking
 		var obj = this;
+
 		this.socket.emit(omni.HOOK_STATE, token, serverName, function() {
 			obj.clientPairsForHookedName[serverName] = {
 				"object" : clientObject,
 				"name" : clientName
 			}
-		})
+		});
+
 	};
 })();

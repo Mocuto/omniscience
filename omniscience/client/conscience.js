@@ -20,6 +20,10 @@
 			obj.onConnected();
 		})
 
+		this.stateNamespace.on("connect", (function() {
+			this.stateHandler.onConnected()
+		}).bind(this));
+
 		this.stateHandler = new omni.StateHandler(stateNamespace);
 	}
 

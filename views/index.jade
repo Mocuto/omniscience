@@ -11,10 +11,12 @@ block content
 			//console.log("Thought sent");
 		}
 		//console.log(conscience);
-		var fruit = {apples : 0};
+		var fruit = {}
+
 		
 		conscience.onTokenGranted = function() {
-			conscience.hook("apples", fruit, "apples");
-
+			//conscience.hook("apples", fruit, "apples");
+			conscience.hook("myName", fruit, "name");
+			conscience.hook("emotion", fruit, "emotion");
 			//conscience.setState("apples.oranges", 2);
 		}

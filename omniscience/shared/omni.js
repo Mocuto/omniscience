@@ -18,7 +18,7 @@ omni.getCleanNameForNamespace = function(name) {
 }
 
 omni.getNameForNamespace = function(name, type) {
-	return "/" + this.cleanName + "__" + omni.THOUGHT
+	return "/" + name + "__" + type
 }
 
 omni.clone = function (object) {

@@ -31,8 +31,7 @@
 	}
 
 	var convertHookedProperty = function(property) {
-		var value = omni.clone(property.value);  //TODO: CLone this value instead
-
+		var value = omni.clone(property.get());  //TODO: CLone this value instead
 
 		if(Object.prototype.isPrototypeOf(value))
 		{
@@ -45,13 +44,15 @@
 		}
 
 		return value;
-		
 	}
 
 	omni.StateHandler.prototype.prepareSocket = function(socket) {
 		var obj = this;
 
+		console.log("Preparing socket");
+
 		socket.on(omni.GET_STATE, function(token, propertyName, callback) {
+
 			var property = obj.getProperty(propertyName);
 
 			if(typeof callback === "undefined" || callback == null) {
@@ -85,7 +86,8 @@
 		})
 
 		socket.on(omni.SET_STATE, function(token, propertyName, value, callback) {
-			if(typeof callback === "undefined" || callback == null) {
+			if(typeof callback === "undefined" || callback == null)
+			{
 				callback = function() {};
 			}
 
@@ -101,17 +103,15 @@
 			}
 		})
 
-		socket.on(omni.HOOK_STATE, function(token, propertyName, callback) {
+		socket.on(omni.HOOK_STATE, (function(token, propertyName, callback) {
 			var property = obj.getProperty(propertyName);
-			if(property != null && propertyName in obj.hookedSocketsForProperty) {
-				console.log("Hooking: " + propertyName)
-				obj.hookedSocketsForProperty[propertyName].push(socket);
-				property.isHooked = true;
-				callback();
-				console.log(convertHookedProperty(property));
-				socket.emit(omni.HOOK_STATE, propertyName, convertHookedProperty(property))
+
+			if(property != null && propertyName in obj.hookedSocketsForProperty)
+			{
+				obj.addHookForProperty(property, socket, callback);
 			}
-		})
+
+		}).bind(this));
 
 		socket.on(omni.UNHOOK_STATE, function(token, propertyName, callback) {
 			var property = obj.getProperty(propertyName);
@@ -129,6 +129,50 @@
 				callback();
 			}
 		});
+	}
+
+	omni.StateHandler.prototype.addHookForProperty = function(property, socket, callback) {
+		if(callback != null)
+		{
+			callback();			
+		}
+
+		var propertyName = property.fullName.substr("state.".length);
+		this.hookedSocketsForProperty[propertyName].push(socket);
+
+		console.log("Hooking: " + propertyName)
+
+
+
+		var convertedProperty = convertHookedProperty(property)
+
+		console.log(property.get());
+		console.log(convertedProperty);
+		socket.emit(omni.HOOK_STATE, propertyName, convertedProperty);
+
+		for(var i = 0; i < property.childrenNames.length; i++)
+		{
+			var childName = property.childrenNames[i];
+
+			/**
+				We may want to change this so that the callback is passed to each consecutive call, 
+				with the parameters changing each time
+			**/
+
+			this.addHookForProperty(property.value[childName], socket, null);
+		}
+
+		if(property.isHooked == true)
+		{
+			return;
+		}
+		else 
+		{
+
+			property.isHooked = true;
+		}
+		
+
 	}
 
 	omni.StateHandler.prototype.getProperty = function(propertyName) {
@@ -227,19 +271,22 @@
 		}
 	}
 
-	omni.StateHandler.prototype.updateHook = function(propertyName, value) {
+	omni.StateHandler.prototype.updateHook = function(propertyName, property) {
 		var subName = propertyName.substr("state.".length);
+		console.log(this.hookedSocketsForProperty);
 		var sockets = this.hookedSocketsForProperty[subName];
 
 		console.log("Update hook");
-		console.log(sockets);
+		console.log(propertyName + " ");
 		if(typeof sockets !== "undefined")
 		{
-
+			var convertedValue = convertHookedProperty(property);
 			for(var i = 0; i < sockets.length; i++)
 			{
+
 				var socket = sockets[i];
-				socket.emit(omni.HOOK_STATE, subName, convertHookedProperty(value))
+				var result = socket.emit(omni.HOOK_STATE, subName, convertedValue);
+				console.log("Updating " + subName + " " + convertedValue + " " + property.value + " ");
 			}
 
 		}

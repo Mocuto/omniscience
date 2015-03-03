@@ -9,6 +9,8 @@
 		this.thoughtNamespace = io.of(omni.getNameForNamespace(this.cleanName, omni.THOUGHT));
 		this.stateNamespace = io.of(omni.getNameForNamespace(this.cleanName, omni.STATE));
 
+		console.log(omni.getNameForNamespace(this.cleanName, omni.STATE))
+
 		this.socketForId = {};
 		this.clients = [];
 
