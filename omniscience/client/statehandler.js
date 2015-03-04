@@ -11,17 +11,18 @@
 		this.socket.on(omni.HOOK_STATE, (function(propertyName, value) {
 
 			var tokens = propertyName.split(".");
-			var name = "";
-			
-			var clientObject = null;
-			var clientName = "";
+			var name = tokens[0];
 
-
-			name = propertyName
 			var pair = this.clientPairsForHookedName[name];
 
-			clientObject = pair.object;
-			clientName = pair.name;
+			var clientObject = pair.object;
+			var clientName = pair.name;
+
+			for (var i = 0; i < tokens.length - 1; i ++)
+			{
+				clientObject = clientObject[tokens[i]];
+				clientName = tokens[i + 1];
+			}
 
 			clientObject[clientName] = value;
 
@@ -96,7 +97,6 @@
 	}
 
 	omni.StateHandler.prototype.hook = function(token, serverName, clientObject, clientName) {
-		// TODO: Handle hooking
 		var obj = this;
 
 		this.socket.emit(omni.HOOK_STATE, token, serverName, function() {

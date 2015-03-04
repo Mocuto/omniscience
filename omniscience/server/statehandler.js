@@ -200,44 +200,44 @@
 		return currentProperty;
 	}
 
-	omni.StateHandler.prototype.addProperty = function(object, name, options) {
+	omni.StateHandler.prototype.addProperty = function(containingProperty, name, options) {
 
-		var newProp = new omni.Property(name, options.get, options.set, options.value, this);
-		newProp.fullName = object.fullName + "." + name;
+		var newProperty = new omni.Property(name, options.get, options.set, options.value, this);
+		newProperty.fullName = containingProperty.fullName + "." + name;
 
-		object.value[name] = newProp;
-		object.childrenNames.push(name);
+		containingProperty.value[name] = newProperty;
+		containingProperty.childrenNames.push(name);
 
-		//Define getter and setter on object
-		Object.defineProperty(object, name,
+		//Define getter and setter on containingProperty
+		Object.defineProperty(containingProperty, name,
 			{
 				configurable : true,
 				enumerable : true,
 
 				get : function() {
-					return newProp.value;
+					return newProperty.value;
 				},
 				set : function(newValue) {
-					newProp.value = newValue;
+					newProperty.value = newValue;
 				}
 			}
 		);
 
-		var subName = newProp.fullName.substr("state.".length);
+		var subName = newProperty.fullName.substr("state.".length);
 		console.log("SubName is " + subName);
 		this.hookedSocketsForProperty[subName] = [];
 
-		if(object.isHooked == true)
+		if(containingProperty.isHooked == true)
 		{
-			newProp.isHooked = true;
-			this.hookedSocketsForProperty[subName] = this.hookedSocketsForProperty[object.fullName.substr("state.")];
+			newProperty.isHooked = true;
+			this.hookedSocketsForProperty[subName] = this.hookedSocketsForProperty[containingProperty.fullName.substr("state.")];
 		}
 
-		this.properties[subName] = newProp;
+		this.properties[subName] = newProperty;
 	}
 
-	omni.StateHandler.prototype.removeProperty = function(object, name) {
-		var prop = object.value[name];
+	omni.StateHandler.prototype.removeProperty = function(containingProperty, name) {
+		var prop = containingProperty.value[name];
 
 		if(typeof prop === "undefined" || prop == null)
 		{
@@ -248,13 +248,13 @@
 
 		delete this.properties[prop.fullName];
 
-		if(object.isHooked == true)
+		if(containingProperty.isHooked == true)
 		{
 			delete this.hookedSocketsForProperty[subName];
 		}
 
-		//Define getter and setter on object
-		Object.defineProperty(object, name,
+		//Define getter and setter on containingProperty
+		Object.defineProperty(containingProperty, name,
 			{
 				configurable : true,
 				enumerable : false,
@@ -264,10 +264,10 @@
 			}
 		);
 
-		var index = object.childrenNames.indexOf(name);
+		var index = containingProperty.childrenNames.indexOf(name);
 		if(index != -1)
 		{
-			object.childrenNames.splice(index, 1);
+			containingProperty.childrenNames.splice(index, 1);
 		}
 	}
 

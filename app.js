@@ -97,6 +97,16 @@ conscience.addProperty(conscience.state.value.apples, "oranges", {
     value : 0
 })
 
+conscience.addProperty(conscience.state.value.apples, "strawberries", {
+    get : function(token) {
+        return this.value;
+    },
+    set : function(token, newValue) {
+        this.value = newValue;
+    },
+    value : "Shortcake!"
+})
+
 console.log(conscience.state.apples.oranges);
 
 console.log(conscience.state);
