@@ -55,7 +55,8 @@
 
 			var property = obj.getProperty(propertyName);
 
-			if(typeof callback === "undefined" || callback == null) {
+			if(typeof callback === "undefined" || callback == null)
+			{
 				callback = function() {};
 			}
 			//callback = function() {console.log("I ran!")};
@@ -86,6 +87,8 @@
 		})
 
 		socket.on(omni.SET_STATE, function(token, propertyName, value, callback) {
+			console.log("SET_STATE");
+			console.log(value);
 			if(typeof callback === "undefined" || callback == null)
 			{
 				callback = function() {};
