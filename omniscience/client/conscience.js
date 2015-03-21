@@ -105,7 +105,7 @@
 	 * @method sendThought
 	 * @public
 	 * @memberof (client) omni.(client) Conscience#
-	 * @desc Creates a thought with the specified data, name, and sends it to the specified receivers
+	 * @desc Creates a thought with the specified data, name, and sends it to the specified receivers.
 	 * @param {Any} data - the data to send with the thought
 	 * @param {String} - The name of the thought.
 	 * @param {Array} receivers - an array ot tokens indicating the clients of which to receieve the thought. Put null to send to all clients
@@ -150,7 +150,7 @@
 	 * @desc Establishes server to client databinding for the given state to a given client side object (AKA "hooking").
 	 * @param {String} serverName - The name of the state as stored on the server.
 	 * @param {Object} clientObject - The client side object that will contain the property.
-	 * @param {String} clientNmae - The name of the property as stored on the client
+	 * @param {String} clientName - The name of the property as stored on the client.
 	 */
 
 	omni.Conscience.prototype.hook = function(serverName, clientObject, clientName) {

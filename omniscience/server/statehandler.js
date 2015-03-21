@@ -1,4 +1,13 @@
 (function() {
+
+	/**
+	 *  @class (server) StateHandler
+	 *  @classdesc Handles communicating with clients regarding state.
+	 *  @param {Socket} namespaceSocket - The socket with which to communicate with all clients.
+	 *  @param {Dictionary} sockets - A dictionary mapping client identifiers to their corresponding sockets.
+	 *  @param {(server) omni.(server) Property} state - The default state the handler will start with.
+	 *  @memberof (server) omni
+	*/
 	omni.StateHandler = function(namespaceSocket, sockets, state) {
 		this.io = namespaceSocket;
 		this.sockets = sockets;
@@ -11,9 +20,16 @@
 		})
 
 		this.properties = {};
-		//TODO: Implement hooking
 	}
 
+	/**
+	 * @method convertPropertyForClient
+	 * @private
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Converts the given property with its given value such that it and its child omni.Property instances represent their stored value.
+	 * @param {(server) omni.(server) Property} property - The property to convert.
+	 * @param {Any} value - The value of that property.
+	 */
 	var convertPropertyForClient = function(property, value) {
 		value.__omniChildPropertyNames = [];
 		for(var i = 0; i < property.childrenNames.length; i++) {
@@ -30,8 +46,16 @@
 		}
 	}
 
+	/**
+	 * @method convertHookedProperty
+	 * @private
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Converts the given property for hooking such that the values are cloned.
+	 * @param {(server) omni.(server) Property} property - The property to convert.
+	 * @param {Any} value - The value of that property.
+	 */
 	var convertHookedProperty = function(property) {
-		var value = omni.clone(property.get());  //TODO: CLone this value instead
+		var value = omni.clone(property.get());
 
 		if(Object.prototype.isPrototypeOf(value))
 		{
@@ -46,10 +70,15 @@
 		return value;
 	}
 
+	/**
+	 * @method prepareSocket
+	 * @public
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Adds the get state, set state, and hook callbacks for the given socket, thus preparing it for use within the StateHandler.
+	 * @param {Socket} socket - The socket to prepare.
+	 */
 	omni.StateHandler.prototype.prepareSocket = function(socket) {
 		var obj = this;
-
-		console.log("Preparing socket");
 
 		socket.on(omni.GET_STATE, function(token, propertyName, callback) {
 
@@ -59,7 +88,6 @@
 			{
 				callback = function() {};
 			}
-			//callback = function() {console.log("I ran!")};
 
 			if(property != null && token != null)
 			{
@@ -134,6 +162,15 @@
 		});
 	}
 
+	/**
+	 * @method addHookForProperty
+	 * @public
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Adds the get state, set state, and hook callbacks for the given socket, thus preparing it for use within the StateHandler.
+	 * @param {omni.Property} property - The property to hook.
+	 * @param {Socket} socket - The client socket that is participating in the hooking.
+	 * @param [Function] callback - A callback to execute upon begining the routine.
+	 */
 	omni.StateHandler.prototype.addHookForProperty = function(property, socket, callback) {
 		if(callback != null)
 		{
@@ -143,24 +180,18 @@
 		var propertyName = property.fullName.substr("state.".length);
 		this.hookedSocketsForProperty[propertyName].push(socket);
 
-		console.log("Hooking: " + propertyName)
-
-
-
 		var convertedProperty = convertHookedProperty(property)
 
-		console.log(property.get());
-		console.log(convertedProperty);
 		socket.emit(omni.HOOK_STATE, propertyName, convertedProperty);
 
 		for(var i = 0; i < property.childrenNames.length; i++)
 		{
 			var childName = property.childrenNames[i];
 
-			/**
+			/*
 				We may want to change this so that the callback is passed to each consecutive call, 
 				with the parameters changing each time
-			**/
+			*/
 
 			this.addHookForProperty(property.value[childName], socket, null);
 		}
@@ -178,6 +209,14 @@
 
 	}
 
+	/**
+	 * @method getProperty
+	 * @public
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Returns the property with the given name, or null if it is not found.
+	 * @param {String} propertyName - The name of the property to return.
+	 * @returns {omni.Property} The property with the given name
+	 */
 	omni.StateHandler.prototype.getProperty = function(propertyName) {
 		if(typeof propertyName !== "string") {
 			return null;
@@ -186,8 +225,6 @@
 			return this.state;
 		}
 		var tokens = propertyName.split(".");
-		console.log("tokens are: ");
-		console.log(tokens);
 		var currentProperty = this.state.value[tokens[0]];
 
 		for(var i = 1; i < tokens.length; i++)
@@ -203,6 +240,18 @@
 		return currentProperty;
 	}
 
+	/**
+	 * @method addProperty
+	 * @public
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Adds a new property with the given name and options to a specified containing property.
+	 * @param {omni.Property} containingProperty - The parent property for the new property.
+	 * @param {String}  name - The name of the new property.
+ 	 * @param {Object} options - The options with which to create the property.
+	 * @param {Function} options.get - The get function of that property.
+	 * @param {Function} options.set - The set function of that property.
+	 * @param {Any} options.value - The default value of that property.
+	 */
 	omni.StateHandler.prototype.addProperty = function(containingProperty, name, options) {
 
 		var newProperty = new omni.Property(name, options.get, options.set, options.value, this);
@@ -239,6 +288,15 @@
 		this.properties[subName] = newProperty;
 	}
 
+	/**
+	 * @method removeProperty
+	 * @public
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Removes the property with the given name from the paren property.
+	 * @param {omni.Property} containingProperty - The parent property of the property to remove.
+	 * @param {String}  name - The name of the property to remove.
+	 */
+
 	omni.StateHandler.prototype.removeProperty = function(containingProperty, name) {
 		var prop = containingProperty.value[name];
 
@@ -274,22 +332,27 @@
 		}
 	}
 
+	/**
+	 * @method updateHook
+	 * @public
+	 * @memberof (server) omni.(server) StateHandler#
+	 * @desc Removes the property with the given name from the paren property.
+	 * @param {String}  propertyName - The name of the property that is being updated on the client side.
+	 * @param {omni.Property} property - The property that has been updated on the server side.
+	 */
+
 	omni.StateHandler.prototype.updateHook = function(propertyName, property) {
 		var subName = propertyName.substr("state.".length);
 		console.log(this.hookedSocketsForProperty);
 		var sockets = this.hookedSocketsForProperty[subName];
 
-		console.log("Update hook");
-		console.log(propertyName + " ");
 		if(typeof sockets !== "undefined")
 		{
 			var convertedValue = convertHookedProperty(property);
 			for(var i = 0; i < sockets.length; i++)
 			{
-
 				var socket = sockets[i];
 				var result = socket.emit(omni.HOOK_STATE, subName, convertedValue);
-				console.log("Updating " + subName + " " + convertedValue + " " + property.value + " ");
 			}
 
 		}

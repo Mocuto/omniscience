@@ -1,6 +1,15 @@
 (function() {
 
-
+	/**
+	 *  @class (server) Property
+	 *  @classdesc A server-side property to be synced across multiple clients. Has getter and setter functions.
+	 *  @param {name} name - The name of the property.
+	 *  @param {Function} getFunction - The function that is called when the client attempts to get the property's value.
+	 *  @param {Function} setFunction - The function that is called when the client attempts to set the property's value.
+	 *  @param {Any} initialValue - The initial value of the property.
+	 *  @param {(server) omni.(server) StateHander} stateHandler - The StateHandler that will communicate regarding this property.
+	 *  @memberof (server) omni
+	*/
 	omni.Property = function(name, getFunction, setFunction, initialValue, stateHandler) {
 		this.name = name;
 		this.fullName = name;
@@ -12,8 +21,6 @@
 				return stateHandler
 			}
 		});
-
-		//this.stateHandler = stateHandler;
 
 		this.childrenNames = [];
 
@@ -56,7 +63,13 @@
 			}
 		}
 	}
-
+	/**
+	 * @method addHock
+	 * @public
+	 * @memberof (server) omni.(server) Property#
+	 * @desc Hooks this property to the client connected on the given socket
+	 * @param {Socket} socket - The socket that handles communication with that client.
+	 */
 	omni.Property.prototype.addHook = function(socket) {
 		this.hookedSockets.push(socket);
 	}
