@@ -1,22 +1,22 @@
 {
   "name": "omniscience",
-  "version": "0.0.1",
-  "main" : "index.js",
+  "version": "1.0.0",
+  "main": "index.js",
   "dependencies": {
     "debug": "~0.7.4",
-    "socket.io": "~1.1.0",
+    "socket.io": "~1.1.0"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/Mocuto/omniscience.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mocuto/omniscience.git"
   },
-  "keywords" : [
+  "keywords": [
     "networking",
     "multi-client",
     "conscience"
   ],
   "author" : "Mocuto Oshi <DailyGameReview.DGR@gmail.com>",
-  "bugs" : {
-    "url" : "https://github.com/Mocuto/omniscience/issues"
+  "bugs": {
+    "url": "https://github.com/Mocuto/omniscience/issues"
   }
 }
